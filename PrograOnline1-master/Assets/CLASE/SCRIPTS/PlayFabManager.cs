@@ -7,8 +7,8 @@ using UnityEngine;
 
 public class PlayFabManager : MonoBehaviour
 {
-    public GameObject createAccountPanel;
-    public GameObject loginPanel;
+    public GameObject panelDeCrearCuenta;
+    public GameObject paneldeLogin;
     public GameObject entradaJuego;
 
     public TMP_InputField usuarioRegistro;
@@ -24,10 +24,10 @@ public class PlayFabManager : MonoBehaviour
 
     private void Start()
     {
-        createAccountPanel.SetActive(false);
-        loginPanel.SetActive(true);
+        panelDeCrearCuenta.SetActive(false);
+        paneldeLogin.SetActive(true);
         entradaJuego.SetActive(false);
-        mensaje.text = "";
+        mensaje.text = ""; //vacio
     }
 
     public void AbrirRegistro()
@@ -37,8 +37,8 @@ public class PlayFabManager : MonoBehaviour
             return;
         }
 
-        loginPanel.SetActive(false);
-        createAccountPanel.SetActive(true);
+        paneldeLogin.SetActive(false);
+        panelDeCrearCuenta.SetActive(true);
         mensaje.text = "";
     }
 
@@ -49,8 +49,8 @@ public class PlayFabManager : MonoBehaviour
             return;
         }
 
-        createAccountPanel.SetActive(false);
-        loginPanel.SetActive(true);
+        panelDeCrearCuenta.SetActive(false);
+        paneldeLogin.SetActive(true);
         mensaje.text = "";
     }
 
@@ -76,8 +76,8 @@ public class PlayFabManager : MonoBehaviour
         {
             await RegisterUserInPlayFabTask();
 
-            createAccountPanel.SetActive(false);
-            loginPanel.SetActive(true);
+            panelDeCrearCuenta.SetActive(false);
+            paneldeLogin.SetActive(true);
 
             mensaje.text = "Cuenta creada. Ahora inicia sesion";
         }
@@ -151,8 +151,8 @@ public class PlayFabManager : MonoBehaviour
         ocupado = false;
         mensaje.text = "";
 
-        loginPanel.SetActive(false);
-        createAccountPanel.SetActive(false);
+        paneldeLogin.SetActive(false);
+        panelDeCrearCuenta.SetActive(false);
         entradaJuego.SetActive(true);
     }
 
