@@ -18,7 +18,7 @@ public class MenuPrincipal : MonoBehaviour
     public GameObject panelUnirse;
 
     public TMP_Text mensaje;
- 
+
 
     public TMP_InputField nombreCrear;
     public TMP_InputField cantidadJugadores;
@@ -122,12 +122,17 @@ public class MenuPrincipal : MonoBehaviour
         panelUnirse.SetActive(true);
     }
 
- 
+
 
     public async void CrearPartida()
     {
+
+        if (ocupado)
+        {
+            return;
+        }
         string nombre = nombreCrear.text.Trim(); //trim quita los espacios al inicio y final del texto pa que no los cuente como parte del string
-        int jugadores;
+        int jugadores = 2;
 
         if (nombre == "") //osea, si el nombre esta vacio
         {
@@ -135,9 +140,19 @@ public class MenuPrincipal : MonoBehaviour
             return;
         }
 
-        if (!int.TryParse(cantidadJugadores.text, out jugadores)) //el try parse es como el to string. lo convierte en un entero. try pq devuelve un booleano. 
+        if (cantidadJugadores.text.Trim() != "")
         {
-            mensaje.text = "De cuantos jugadores es la partida";
+            if (!int.TryParse(cantidadJugadores.text, out jugadores)) //el try parse es como el to string. lo convierte en un entero. try pq devuelve un booleano. 
+            {
+                mensaje.text = "Escribe una cantidad numerica";
+                return;
+            }
+
+        }
+
+        if (jugadores < 2 || jugadores > 10) // || es or
+        {
+            mensaje.text = "Minimo 2 jugadores, maximo 10";
             return;
         }
 
@@ -145,7 +160,7 @@ public class MenuPrincipal : MonoBehaviour
 
     }
 
-    private async void UnirsePartida()
+    public async void UnirsePartida()
     {
         string nombre = nombreUnirse.text.Trim();
 
@@ -168,6 +183,8 @@ public class MenuPrincipal : MonoBehaviour
         ocupado = true;
         mensaje.text = "Conectando...";
 
+        try //intenta conectarse
+        { 
         if (!conectado) //si no esta conectado se intenta conectar
         {
             conectado = await photonManager.ConnectToServerLobby();
@@ -180,14 +197,34 @@ public class MenuPrincipal : MonoBehaviour
             return;
         }
 
-        bool resultado = await photonManager.StartGame(mode, nombre, jugadores, privada);
+        bool resultado = await photonManager.StartGame(mode, nombre, jugadores, privada); //await awaits (literal) espera una respuesta mientras pasa algo. (unity mostrando la pantalla)
 
         if (resultado)
         {
             OcultarPaneles();
+                mensaje.text = "";
+
         }
-        ocupado = false;
-    }
+
+        else
+            {
+                conectado = false;
+                mensaje.text = "No se pudo conectar";
+
+            }
+         }
+        catch (System.Exception error) // si ocurre un error lo muestra
+        {
+            conectado = false;
+            mensaje.text = "Ocurrio un error";
+            Debug.Log(error);
+        }
+
+        finally //ejecuta esto al final. aunque haya fallado 
+        {
+            ocupado = false;
+        }
+        }
 
     public async void PartidaRapida()
     {
@@ -197,6 +234,12 @@ public class MenuPrincipal : MonoBehaviour
     public async void PartidaRandom()
     {
         await IniciarPartida(GameMode.Client, null, 2, false); //mismo que arriba
+    }
+
+
+    public async void UnirseDesdeLista(string nombre)
+    {
+        await IniciarPartida(GameMode.Client, nombre, 2, false);
     }
 
     private void OcultarPaneles() //ponemos todo en false pa que no se queden puestos

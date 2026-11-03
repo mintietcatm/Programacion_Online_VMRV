@@ -2,11 +2,14 @@ using Fusion;
 using TMPro;
 using UnityEngine;
 
-public class EntradaServidor : MonoBehaviour //session entry
+public class EntradaServidor : MonoBehaviour
 {
-    [SerializeField] public TMP_Text textoNombre;
-    [SerializeField] public TMP_Text textoJugadores;
-    [SerializeField] public TMP_Text textoCapacidad;
+    public TMP_Text textoNombre;
+    public TMP_Text textoJugadores;
+    public TMP_Text textoCapacidad;
+
+    public MenuPrincipal menu;
+    public UnityEngine.UI.Button botondeunirse;
 
     public string nombreSesion;
 
@@ -15,16 +18,18 @@ public class EntradaServidor : MonoBehaviour //session entry
         nombreSesion = session.Name;
 
         textoNombre.text = session.Name;
-        textoJugadores.text = "Jugadores:" + session.PlayerCount;
-        textoCapacidad.text = "Capacidad:" + session.MaxPlayers;
+        textoJugadores.text =""+ session.PlayerCount;
+        textoCapacidad.text =""+ session.MaxPlayers;
+
+        botondeunirse.interactable = session.IsOpen && session.PlayerCount < session.MaxPlayers; 
 
 
 
     }
 
-    public void JoinGame()
+    public void Unirse()
     {
-        //PhotonManager.Instance.StartGame(Fusion.GameMode.Client, textoNombre.text);
+        menu.UnirseDesdeLista(nombreSesion);
     }
 
-}
+    }

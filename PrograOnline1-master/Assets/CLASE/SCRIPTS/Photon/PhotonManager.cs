@@ -24,6 +24,10 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
     private AmmoPickup ammoPickup;
     private RiflePickup riflePickup;
 
+    public Transform[] puntosAparicion; //lista para poner los puntos
+
+    private Dictionary<PlayerRef, int> puntosUsados = new Dictionary<PlayerRef, int>();
+
    [SerializeField] public MenuPrincipal menu;
     public string txtErrorDeConeccion;
 
@@ -229,11 +233,19 @@ public void StartGameAsClient()
 
         if (runner.IsServer)
         {
-            Vector3 spawnPosition = players.Count == 0
-                ? new Vector3(-4f, 1f, 0f)
-                : new Vector3(4f, 1f, 0f);
+            for (int i = 0; i < puntosAparicion.Length; i++)
+            {
+                if (!puntosUsados.ContainsValue(i))
 
-            players.Add(player, runner.Spawn(playerPrefab, spawnPosition, Quaternion.identity, player));
+                {
+                    NetworkObject jugador = runner.Spawn(playerPrefab,puntosAparicion[i].position, puntosAparicion[i].rotation,player);
+                    players.Add(player, jugador);
+                    puntosUsados.Add(player,i);
+
+                    break;
+
+                }
+            }
         }
 
         CreateStormIfNeeded(runner);
@@ -302,7 +314,18 @@ public void StartGameAsClient()
     //Cuando un jugador sle de a partida
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-        //throw new NotImplementedException();
+        if (!runner.IsServer)
+        {
+            return;
+        }
+
+        if (players.ContainsKey(player))
+        {
+            runner.Despawn(players[player]);
+            players.Remove(player);
+        }
+
+        puntosUsados.Remove(player);
     }
 
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress)

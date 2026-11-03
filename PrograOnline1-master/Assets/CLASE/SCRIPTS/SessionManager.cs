@@ -11,6 +11,8 @@ public class SessionManager : MonoBehaviour
 
     private List<EntradaServidor> entradas = new List<EntradaServidor>();
 
+    public MenuPrincipal menu;
+
     public void Actualizar(List<SessionInfo> sesiones)
     {
         for (int i = entradas.Count - 1; i >= 0; i--) //for pero negativo pa quitar en lugar de poner
@@ -37,9 +39,11 @@ public class SessionManager : MonoBehaviour
 
         for (int i = 0; i < sesiones.Count; i++)
         {
-            if (sesiones[i].IsVisible)
+            if (!sesiones[i].IsVisible)
             {
-                bool yaExiste = false;
+                continue;
+            }
+            bool yaExiste = false;
 
                 // Buscamos si ya tenemos una entrada con ese nombre.
                 for (int j = 0; j < entradas.Count; j++)
@@ -53,27 +57,29 @@ public class SessionManager : MonoBehaviour
                     }
                 }
 
+                if  (!yaExiste)
+            {
+                EntradaServidor nuevaEntrada = Instantiate(prefabSesion, content);
+
+                nuevaEntrada.menu = menu;
+                nuevaEntrada.SetInfo(sesiones[i]);
+
+                entradas.Add(nuevaEntrada);
+            }
+
+
+
+                }
                 if (entradas.Count == 0)
                 {
-                    mensajeError.text = "no disponible";
+                    mensajeError.text = "no hay sesiones disponibles";
                 }
                 else
                 {
-                    mensajeError.text = "";
-                }
-
-                if (!yaExiste)
-                {
-                    EntradaServidor nuevaEntrada =
-                        Instantiate(prefabSesion, content);
-
-                    nuevaEntrada.SetInfo(sesiones[i]);
-
-                    entradas.Add(nuevaEntrada);
+                    mensajeError.text = ""; //se queda vacio
                 }
             }
         }
 
-        }
-    }
-
+        
+    

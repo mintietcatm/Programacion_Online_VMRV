@@ -7,6 +7,12 @@ using UnityEngine.UI;
 
 public class GameOverHUD : MonoBehaviour
 {
+
+    //NOTA!!! 
+    //Esto lo hizo codex en la clase de 6to cuando vimos codex. 
+    //No lo programe yo, ni idea que hace cada cosa. 
+    //Ni fue trampa, ya que se realizo como parte de la clase :)
+
     private Health localHealth;
     private GameObject gameOverCanvas;
     private TMP_Text titleText;
@@ -36,8 +42,10 @@ public class GameOverHUD : MonoBehaviour
 
         int localPlayerId = localHealth.Object.InputAuthority.PlayerId;
 
-        if (localPlayerId != victimId && localPlayerId != attackerId)
+        if (localPlayerId != victimId)
+        {
             return;
+        }
 
         bool localPlayerDied = localPlayerId == victimId;
         gameOverCanvas.SetActive(true);
