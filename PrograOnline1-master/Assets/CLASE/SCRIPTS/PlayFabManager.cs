@@ -1,9 +1,18 @@
 using PlayFab;
 using PlayFab.ClientModels;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+
+//Task representa la operacion asincrona que puede seguir ejecutandose
+//UpdateUserDataResult es el TIPO de respuesta. NO LA RESPUESTA 
+//UpdateUserDataRequest es la informacion que queremos enviar. 
+
+
+
+
 
 public class PlayFabManager : MonoBehaviour
 {
@@ -72,6 +81,8 @@ public class PlayFabManager : MonoBehaviour
         ocupado = true;
         mensaje.text = "Creando cuenta...";
 
+        //Try and Catch 
+
         try
         {
             await RegisterUserInPlayFabTask();
@@ -86,6 +97,8 @@ public class PlayFabManager : MonoBehaviour
             mensaje.text = error.Message;
             Debug.LogException(error);
         }
+
+        //
         finally
         {
             ocupado = false;
@@ -163,4 +176,51 @@ public class PlayFabManager : MonoBehaviour
 
         Debug.LogError(error.GenerateErrorReport());
     }
+
+
+    public async Task<UpdateUserDataResult> PostPlayerDataTask()
+    {
+        var taskSource = new TaskCompletionSource<UpdateUserDataResult>();
+
+        UpdateUserDataRequest request = new UpdateUserDataRequest()
+        {
+            Data= new Dictionary <string,string>()
+          
+        };
+
+
+
+        return await taskSource.Task;
+    }
+
+    private void OnDataReceived(GetUserDataResult result)
+    {
+        Debug.Log("Datos recibidos: " + result);
+
+        if (result.Data != null)
+        {
+
+        }
+    }
+
+    public async Task<UpdatePlayerStatisticsResult> PostPlayerStatsTask()
+    {
+        var taskSource = new TaskCompletionSource<UpdatePlayerStatisticsResult>();
+
+        UpdatePlayerStatisticsRequest request = new UpdatePlayerStatisticsRequest()
+        {
+            Statistics = new List<StatisticUpdate>()
+          {
+              new StatisticUpdate{StatisticName = "Score", Value = 25}
+          }
+        };
+
+        PlayFabClientAPI.UpdatePlayerStatistics(request,
+            resultCallback => taskSource.SetResult(resultCallback),
+            errorCallback => taskSource.SetException(new Exception(errorCallback.ErrorMessage)));
+
+        return await taskSource.Task;
+    }
+
+
 }
