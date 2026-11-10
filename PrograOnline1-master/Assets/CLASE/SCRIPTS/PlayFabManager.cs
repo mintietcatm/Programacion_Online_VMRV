@@ -159,14 +159,34 @@ public class PlayFabManager : MonoBehaviour
         );
     }
 
-    private void OnLogInSuccess(LoginResult result)
+    private async void OnLogInSuccess(LoginResult result)
     {
-        ocupado = false;
+
         mensaje.text = "";
 
-        paneldeLogin.SetActive(false);
-        panelDeCrearCuenta.SetActive(false);
-        entradaJuego.SetActive(true);
+       
+        try
+        {
+            await PostPlayerDataTask();
+             await ObtenerDatosJugador();
+
+            //las movi porque se abria el juego aunque hubiera una falla al enviar los datos
+            paneldeLogin.SetActive(false);
+            panelDeCrearCuenta.SetActive(false);
+            entradaJuego.SetActive(true);
+        }
+
+        catch (Exception error)
+        {
+            mensaje.text = error.Message;
+            Debug.LogException(error);
+        }
+
+        finally
+        {
+            ocupado = false;
+
+        }
     }
 
     private void OnPlayFabError(PlayFabError error)
@@ -181,17 +201,71 @@ public class PlayFabManager : MonoBehaviour
     public async Task<UpdateUserDataResult> PostPlayerDataTask()
     {
         var taskSource = new TaskCompletionSource<UpdateUserDataResult>();
+        int NivelJugador = 10;
+        bool CheatsActivados = false;
 
         UpdateUserDataRequest request = new UpdateUserDataRequest()
         {
-            Data= new Dictionary <string,string>()
-          
+            Data = new Dictionary<string, string>()
+            {
+                {"NombreJugador", "Pablo" },
+                {"Nivel de Jugador", NivelJugador.ToString()},
+                {"Trucos Activados", CheatsActivados.ToString()},
+            }
+
         };
 
+        PlayFabClientAPI.UpdateUserData(request, result => taskSource.SetResult(result), error => taskSource.SetException(new Exception(error.GenerateErrorReport()))); //mejor usamos ese para que Playfab nos diga que fue el error.
 
 
         return await taskSource.Task;
     }
+
+    public async Task<GetUserDataResult> GetPlayerDataTask()
+    {
+        var taskSource = new TaskCompletionSource<GetUserDataResult>();
+
+        GetUserDataRequest request = new GetUserDataRequest();
+
+        PlayFabClientAPI.GetUserData(request, result => taskSource.SetResult(result), error => taskSource.SetException(new Exception(error.GenerateErrorReport())));
+        return await taskSource.Task;
+    }
+
+    public async Task ObtenerDatosJugador()
+    {
+        try
+        {
+            GetUserDataResult resultado = await GetPlayerDataTask();
+
+            if (resultado.Data != null)
+            {
+                if (resultado.Data.ContainsKey("NombreJugador"))
+                {
+                    string nombreJugador = resultado.Data["NombreJugador"].Value;
+                    Debug.Log("Nombre del jugador " + nombreJugador);
+                }
+
+                if (resultado.Data.ContainsKey("Nivel de Jugador"))
+                {
+                    int nivelJugador = int.Parse(resultado.Data["Nivel de Jugador"].Value);
+                    Debug.Log("Nivel del Jugador " + nivelJugador);
+                }
+
+                if (resultado.Data.ContainsKey("Trucos Activados"))
+                {
+                    bool cheatsActivados = bool.Parse(resultado.Data["Trucos Activados"].Value);
+                    Debug.Log("Trucos Activados " + cheatsActivados);
+                }
+            }
+        }
+
+        catch (Exception error)
+        {
+            mensaje.text = error.Message;
+            Debug.LogException(error);
+        }
+    }
+    
 
     private void OnDataReceived(GetUserDataResult result)
     {
