@@ -277,24 +277,5 @@ public class PlayFabManager : MonoBehaviour
         }
     }
 
-    public async Task<UpdatePlayerStatisticsResult> PostPlayerStatsTask()
-    {
-        var taskSource = new TaskCompletionSource<UpdatePlayerStatisticsResult>();
-
-        UpdatePlayerStatisticsRequest request = new UpdatePlayerStatisticsRequest()
-        {
-            Statistics = new List<StatisticUpdate>()
-          {
-              new StatisticUpdate{StatisticName = "Score", Value = 25}
-          }
-        };
-
-        PlayFabClientAPI.UpdatePlayerStatistics(request,
-            resultCallback => taskSource.SetResult(resultCallback),
-            errorCallback => taskSource.SetException(new Exception(errorCallback.ErrorMessage)));
-
-        return await taskSource.Task;
-    }
-
-
+  
 }
