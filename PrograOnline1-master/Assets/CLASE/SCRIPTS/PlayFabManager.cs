@@ -265,7 +265,38 @@ public class PlayFabManager : MonoBehaviour
             Debug.LogException(error);
         }
     }
+
+    //FunctionName   que informacion se ejecuta
+    //FunctionParameter    que informacion se manda
+
     
+    public async Task <ExecuteCloudScriptResult> EjecutarHolaMundoTask() //async que devuelve el resultado del cloudscript
+    {
+        var taskSource = new TaskCompletionSource<ExecuteCloudScriptResult>();
+
+        ExecuteCloudScriptRequest request = new ExecuteCloudScriptRequest()
+        {
+            FunctionName = "HolaMundo",
+            FunctionParameter = new
+            {
+                nombre = "Pablo",
+                nivel = 13,
+                trucos = true
+            }
+
+        };
+
+        PlayFabClientAPI.ExecuteCloudScript(request, result => taskSource.SetResult(result), error => taskSource.SetException(new Exception(error.GenerateErrorReport())));
+        return await taskSource.Task;
+    }
+
+    [ContextMenu("ProbarElHolaMundo")]
+
+    private async void ProbarHolaMundo()
+    {
+        ExecuteCloudScriptResult resultado = await EjecutarHolaMundoTask();
+        Debug.Log(resultado.FunctionResult.ToString());
+    }
 
     private void OnDataReceived(GetUserDataResult result)
     {
